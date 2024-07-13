@@ -1,0 +1,7 @@
+.git
+.github
+test
+README*
+build
+service.yaml
+fly.toml
