@@ -16,9 +16,12 @@ pub fn handle_request(req: Request) -> Response {
   case wisp.path_segments(req) {
     // This matches `/`.
     [] -> home_page(req)
+    ["cors"] -> cors(req)
     ["eicar"] -> eicar(req)
     ["json"] -> json_from_params(req)
     ["json", "b64", enc] -> json_from_b64(req, enc)
+    ["svg", ..] -> svg(req)
+    ["html", ..] -> html(req)
     ["get", ..] -> only_get(req)
     ["log", ..] -> log_body(req)
     ["404"] -> wisp.not_found()
@@ -34,6 +37,19 @@ fn home_page(_req: Request) -> Response {
   let html = string_builder.from_string("Hello, world!")
   wisp.ok()
   |> wisp.html_body(html)
+}
+
+fn cors(req: Request) -> Response {
+  let html = string_builder.from_string("Hello, world!")
+  case list.key_find(req.headers, "origin") {
+    Ok(origin) -> {
+        wisp.ok()
+        |> wisp.html_body(html)
+        |> wisp.set_header("Access-Control-Allow-Origin", origin)
+        |> wisp.set_header("Access-Control-Allow-Credentials", "true")
+      }
+    _ -> wisp.ok() |> wisp.html_body(html)
+  }
 }
 
 fn eicar(_req: Request) -> Response {
@@ -79,6 +95,40 @@ fn json_from_b64(_req: Request, enc: String) -> Response {
       |> wisp.json_body(decoded)
     }
     Error(_) -> wisp.bad_request()
+  }
+}
+
+fn svg(req: Request) -> Response {
+  let response = {
+    use <- wisp.serve_static(req, "/svg", "/app/static/svg")
+    wisp.ok()
+  }
+  case list.key_find(req.headers, "origin") {
+    Ok(origin) -> {
+        response
+        |> wisp.set_header("Access-Control-Allow-Origin", origin)
+        |> wisp.set_header("Access-Control-Allow-Credentials", "true")
+      }
+    _ -> {
+        response
+      }
+  }
+}
+
+fn html(req: Request) -> Response {
+  let response = {
+    use <- wisp.serve_static(req, "/html", "/app/static/html")
+    wisp.ok()
+  }
+  case list.key_find(req.headers, "origin") {
+    Ok(origin) -> {
+        response
+        |> wisp.set_header("Access-Control-Allow-Origin", origin)
+        |> wisp.set_header("Access-Control-Allow-Credentials", "true")
+      }
+    _ -> {
+        response
+      }
   }
 }
 

@@ -7,6 +7,7 @@ COPY . /build/
 RUN cd /build \
   && gleam export erlang-shipment \
   && mv build/erlang-shipment /app \
+  && mv static /app/static \
   && rm -r /build \
   && chmod -R a=rX /app \
   && chmod +x /app/entrypoint.sh
