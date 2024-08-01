@@ -7,6 +7,8 @@ implementation turned out to have significantly lower baseline memory
 requirements, and I found Gleam very pleasant to write, so it replaced
 the original.
 
+I've found it quite helpful for CTF challenges involving SSRF and XSS.
+
 Please use responsibly :)
 
 ## Deployment
